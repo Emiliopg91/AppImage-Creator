@@ -146,7 +146,10 @@ def create_resources():
     content = ""
     with open(parametros.desktop, 'r') as file:
         content = file.read()    
-    new_content = content.replace("{name}", f"{re.sub(r"-AppImage$", "", parametros.name)}").replace("{version}", f"{parametros.version}").replace("{entrypoint}", f"{os.path.basename(parametros.entrypoint)}").replace("{icon}", "logo")
+    new_content = content.replace("{name}", f"{re.sub(r'-AppImage$', '', parametros.name)}") \
+                     .replace("{version}", f"{parametros.version}") \
+                     .replace("{entrypoint}", f"{os.path.basename(parametros.entrypoint)}") \
+                     .replace("{icon}", "logo")
     with open(desktop_entry, 'w') as file:
         file.write(new_content)
 
@@ -181,4 +184,3 @@ if __name__ == "__main__":
     create_resources()
     download_appimagetool()
     create_appimage()
-    clear_workspace()
