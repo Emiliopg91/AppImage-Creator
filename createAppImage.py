@@ -146,7 +146,7 @@ def create_resources():
     content = ""
     with open(parametros.desktop, 'r') as file:
         content = file.read()    
-    new_content = content.replace("{name}", f"{re.sub(r'-AppImage$', '', parametros.name)}") \
+    new_content = content.replace("{name}", f"{parametros.name}") \
                      .replace("{version}", f"{parametros.version}") \
                      .replace("{entrypoint}", f"{os.path.basename(parametros.entrypoint)}") \
                      .replace("{icon}", "logo")
