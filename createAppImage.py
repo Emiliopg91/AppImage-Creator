@@ -19,7 +19,7 @@ class InputParameters:
     desktop: str
 
     def __init__(self, name, version, entrypoint, icon, description, desktop):
-        self.name = name
+        self.name = re.sub(r'[^a-zA-Z0-9]', '-', name)
         self.version = version
         self.entrypoint = os.path.abspath(entrypoint)
         self.icon = os.path.abspath(icon)
