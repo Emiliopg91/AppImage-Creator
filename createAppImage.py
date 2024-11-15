@@ -19,7 +19,7 @@ class InputParameters:
     desktop: str
 
     def __init__(self, name, version, entrypoint, icon, description, desktop):
-        self.name = re.sub(r'[^a-zA-Z0-9]', '-', name)
+        self.name = name
         self.version = version
         self.entrypoint = os.path.abspath(entrypoint)
         self.icon = os.path.abspath(icon)
@@ -85,7 +85,7 @@ appimagetool_path = os.path.join(home_dir, "appimagetool")
 tmp_path = tempfile.mkdtemp(prefix = "create-appimage-")
 
 on_github = os.getenv("GITHUB_ACTIONS") == "true"
-github_repo = f"Emiliopg91/{parametros.name}"
+github_repo = f"Emiliopg91/VSCode-AppImage"
 github_env_path = os.getenv("GITHUB_ENV")
 
 if os.getenv("GITHUB_ACTIONS") == "true":
@@ -158,7 +158,8 @@ def create_resources():
                         .replace("{version}", f"{parametros.version}") \
                         .replace("{entrypoint}", f"{os.path.basename(parametros.entrypoint)}") \
                         .replace("{icon}", "logo") \
-                        .replace("{description}", f"{parametros.description}")
+                        .replace("{description}", f"{parametros.description}") \
+                        .replace("{url}", f"https://github.com/{github_repo}")
     with open(desktop_entry, 'w') as file:
         file.write(new_content)
 
@@ -170,8 +171,8 @@ def create_resources():
 
 def create_appimage():
     print("Generando AppImage...")
-    appimage_path = os.path.join(home_dir, f"{parametros.name}-{parametros.version}.AppImage")
-    command = f'ARCH=x86_64 {appimagetool_path} --comp gzip {tmp_path} "{appimage_path}" -u "gh-releases-zsync|{github_repo.replace("/", "|")}|latest|{parametros.name}-*.AppImage.zsync"'
+    appimage_path = os.path.join(home_dir, f"{re.sub(r'[^a-zA-Z0-9]', '-', parametros.name)}-{parametros.version}.AppImage")
+    command = f'ARCH=x86_64 {appimagetool_path} --comp gzip {tmp_path} "{appimage_path}" -u "gh-releases-zsync|{github_repo.replace("/", "|")}|latest|{re.sub(r'[^a-zA-Z0-9]', '-', parametros.name)}-*.AppImage.zsync"'
     print(f"Ejecutando: {command}")
     
     result = subprocess.run(command, shell=True)
