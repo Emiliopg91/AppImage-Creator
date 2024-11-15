@@ -168,7 +168,7 @@ def create_appimage(parametros: InputParameters):
         print(f"Error output:\n{result.stderr.decode()}")
         raise RuntimeError(f"Command finished with exit code {result.returncode}")
 
-    set_github_env_variable("APPIMAGE_PATH", appimage_path)
+    set_github_env_variable("APPIMAGE_PATH", os.path.dirname(appimage_path))
 
 def clear_workspace():
     shutil.rmtree(tmp_path)
