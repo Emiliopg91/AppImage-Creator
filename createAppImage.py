@@ -186,7 +186,7 @@ Categories={parametros.categories};
 
 def create_appimage(parametros: InputParameters):
     print("Generando AppImage...")
-    command = f'ARCH=x86_64 {appimagetool_path} {tmp_path} {home_dir}/{parametros.name}-{parametros.version}.AppImage -u "gh-releases-zsync|{github_repo.replace("/","|")}|latest|{parametros.name}-*.AppImage.zsync"'
+    command = f'ARCH=x86_64 {appimagetool_path} {tmp_path} {home_dir}/{parametros.name}-{parametros.version}.AppImage -u "gh-releases-zsync|\"{github_repo.replace("/","|")}|latest|{parametros.name}-*.AppImage.zsync\""'
     print(f"Ejecutando: {command}")
     
     result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
