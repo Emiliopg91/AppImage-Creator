@@ -107,18 +107,26 @@ def set_github_env_variable(variable_name, value):
 
 def check_plugin_latest_version():
     url = f"http://api.github.com/repos/{github_repo}/releases/latest"
-    response = urllib.request.urlopen(url, context=ssl.create_default_context(cafile=certifi.where()))
-    json_data = json.load(response)
-
-    vers = json_data.get("name")
-
+    
     update = False
-    if vers and vers != parametros.version:
-        print(f"New available version {vers} -> {parametros.version}")
-        update = True
-    else:
-        print("AppImage is up to date")
+    try:
+        response = urllib.request.urlopen(url, context=ssl.create_default_context(cafile=certifi.where()))
+        json_data = json.load(response)
 
+        vers = json_data.get("name")
+        
+        if vers and vers != parametros.version:
+            print(f"New available version {vers} -> {parametros.version}")
+            update = True
+        else:
+            print("AppImage is up to date")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            print(f"No previous releases found for {github_repo}")
+            update = True
+        else:
+            raise e
+        
     set_github_env_variable("IS_UPDATE", f"{update}".lower())
     return update
 
@@ -162,7 +170,7 @@ def create_resources():
 def create_appimage():
     print("Generando AppImage...")
     appimage_path = os.path.join(home_dir, f"{parametros.name}-{parametros.version}.AppImage")
-    command = f'ARCH=x86_64 {appimagetool_path} --comp gzip {tmp_path} "{appimage_path}" -u "gh-releases-zsync|{github_repo}|latest|{parametros.name}-*.AppImage.zsync"'
+    command = f'ARCH=x86_64 {appimagetool_path} --comp gzip {tmp_path} "{appimage_path}" -u "gh-releases-zsync|{github_repo.replace("/", "|")}|latest|{parametros.name}-*.AppImage.zsync"'
     print(f"Ejecutando: {command}")
     
     result = subprocess.run(command, shell=True)
