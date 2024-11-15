@@ -176,10 +176,10 @@ def clear_workspace():
 
 if __name__ == "__main__":
     parametros = extract_params()
-    print(f"GitHub Action? {on_github}")
     check_plugin_latest_version(parametros)
-    print(f"Working directory: {tmp_path}")
+    set_github_env_variable("APP_VERSION", parametros.version)
     os.chdir(tmp_path)
     create_resources(parametros)
     download_appimagetool()
     create_appimage(parametros)
+    clear_workspace()
