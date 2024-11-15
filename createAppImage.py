@@ -1,4 +1,3 @@
-import certifi
 import json
 import os
 import re
@@ -60,7 +59,7 @@ def set_github_env_variable(variable_name, value):
 
 def check_plugin_latest_version(parametros:InputParameters):
     url = f"http://api.github.com/repos/{github_repo}/releases/latest"
-    response = urllib.request.urlopen(url, context=ssl.create_default_context(cafile=certifi.where()))
+    response = urllib.request.urlopen(url, context=ssl.SSLContext())
     json_data = json.load(response)
 
     vers = json_data.get("name")
