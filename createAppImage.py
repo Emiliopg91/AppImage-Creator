@@ -9,24 +9,6 @@ import urllib.request
 import shutil
 import subprocess
 
-
-home_dir = os.path.expanduser("~")
-appimagetool_path = os.path.join(home_dir, "appimagetool")
-tmp_path = tempfile.mkdtemp(prefix = "create-appimage-")
-
-on_github = os.getenv("GITHUB_ACTIONS") == "true"
-github_repo = "Emiliopg91/AllyDeckyCompanion"
-github_env_path = os.getenv("GITHUB_ENV")
-
-if os.getenv("GITHUB_ACTIONS") == "true":
-    github_repo = os.getenv("GITHUB_REPOSITORY")
-else:
-    github_env_path = os.path.join(home_dir, "git.env")
-    if(os.path.isfile(github_env_path)):
-        os.unlink(github_env_path)
-    with open(github_env_path, "w") as archivo:
-        pass
-
 class InputParameters:
     name: str
     version: str
@@ -43,32 +25,6 @@ class InputParameters:
         self.icon = os.path.abspath(icon)
         self.description = description
         self.desktop = os.path.abspath(desktop)
-
-def set_github_env_variable(variable_name, value):
-    if github_env_path:
-        # Escribe la variable de entorno en el archivo $GITHUB_ENV
-        with open(github_env_path, "a") as f:
-            f.write(f"{variable_name}={value}\n")
-    else:
-        print("No se pudo encontrar la ruta de $GITHUB_ENV. ¿Estás ejecutando este script dentro de GitHub Actions?")
-
-def check_plugin_latest_version(parametros:InputParameters):
-    url = f"http://api.github.com/repos/{github_repo}/releases/latest"
-    response = urllib.request.urlopen(url, context=ssl.create_default_context(cafile=certifi.where()))
-    json_data = json.load(response)
-
-    vers = json_data.get("name")
-
-    update = False
-    if vers and vers != parametros.version:
-        print(f"New available version {vers} -> {parametros.version}")
-        update = True
-    else:
-        print("AppImage is up to date")
-
-    set_github_env_variable("IS_UPDATE", f"{update}".lower())
-    return update
-
 
 def print_help():
     """Imprime el menú de ayuda."""
@@ -122,6 +78,50 @@ def extract_params():
         params["desktop"]
     )
 
+parametros = extract_params()
+
+home_dir = os.path.expanduser("~")
+appimagetool_path = os.path.join(home_dir, "appimagetool")
+tmp_path = tempfile.mkdtemp(prefix = "create-appimage-")
+
+on_github = os.getenv("GITHUB_ACTIONS") == "true"
+github_repo = f"Emiliopg91/{parametros.name}"
+github_env_path = os.getenv("GITHUB_ENV")
+
+if os.getenv("GITHUB_ACTIONS") == "true":
+    github_repo = os.getenv("GITHUB_REPOSITORY")
+else:
+    github_env_path = os.path.join(home_dir, "git.env")
+    if(os.path.isfile(github_env_path)):
+        os.unlink(github_env_path)
+    with open(github_env_path, "w") as archivo:
+        pass
+
+def set_github_env_variable(variable_name, value):
+    if github_env_path:
+        # Escribe la variable de entorno en el archivo $GITHUB_ENV
+        with open(github_env_path, "a") as f:
+            f.write(f"{variable_name}={value}\n")
+    else:
+        print("No se pudo encontrar la ruta de $GITHUB_ENV. ¿Estás ejecutando este script dentro de GitHub Actions?")
+
+def check_plugin_latest_version():
+    url = f"http://api.github.com/repos/{github_repo}/releases/latest"
+    response = urllib.request.urlopen(url, context=ssl.create_default_context(cafile=certifi.where()))
+    json_data = json.load(response)
+
+    vers = json_data.get("name")
+
+    update = False
+    if vers and vers != parametros.version:
+        print(f"New available version {vers} -> {parametros.version}")
+        update = True
+    else:
+        print("AppImage is up to date")
+
+    set_github_env_variable("IS_UPDATE", f"{update}".lower())
+    return update
+
 def download_appimagetool():
     if not os.path.isfile(appimagetool_path):
         url = "https://github.com/AppImage/AppImageKit/releases/latest/download/appimagetool-x86_64.AppImage"
@@ -133,7 +133,7 @@ def download_appimagetool():
 
     return appimagetool_path
 
-def create_resources(parametros: InputParameters):
+def create_resources():
     srcDir = os.path.dirname(parametros.entrypoint)
     usrBin = os.path.abspath(os.path.join(".", "usr", "bin"))
     logoPath = os.path.abspath(os.path.join(".","logo.png"))
@@ -146,7 +146,7 @@ def create_resources(parametros: InputParameters):
     content = ""
     with open(parametros.desktop, 'r') as file:
         content = file.read()    
-    new_content = content.replace("{name}", f"{parametros.name}").replace("{version}", f"{parametros.version}").replace("{entrypoint}", f"{os.path.basename(parametros.entrypoint)}").replace("{icon}", "logo")
+    new_content = content.replace("{name}", f"{re.sub(r"-AppImage$", "", parametros.name)}").replace("{version}", f"{parametros.version}").replace("{entrypoint}", f"{os.path.basename(parametros.entrypoint)}").replace("{icon}", "logo")
     with open(desktop_entry, 'w') as file:
         file.write(new_content)
 
@@ -156,31 +156,29 @@ def create_resources(parametros: InputParameters):
     os.chmod(apprun_file, 0o777)
 
 
-def create_appimage(parametros: InputParameters):
+def create_appimage():
     print("Generando AppImage...")
     appimage_path = os.path.join(home_dir, f"{parametros.name}-{parametros.version}.AppImage")
-    command = f'ARCH=x86_64 {appimagetool_path} {tmp_path} "{appimage_path}" -u "gh-releases-zsync|{github_repo.replace("/","|")}|latest|{parametros.name}-*.AppImage.zsync"'
+    command = f'ARCH=x86_64 {appimagetool_path} --comp gzip {tmp_path} "{appimage_path}" -u "gh-releases-zsync|{github_repo}|latest|{parametros.name}-*.AppImage.zsync"'
     print(f"Ejecutando: {command}")
     
-    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
+    result = subprocess.run(command, shell=True)
     if result.returncode != 0:
-        print(f"Error output:\n{result.stderr.decode()}")
         raise RuntimeError(f"Command finished with exit code {result.returncode}")
 
+    shutil.move(os.path.join(tmp_path, f"{os.path.basename(appimage_path)}.zsync"), f"{appimage_path}.zsync")
+
     set_github_env_variable("APPIMAGE_PATH", appimage_path)
-    set_github_env_variable("APPIMAGE_DIR", os.path.dirname(appimage_path))
 
 def clear_workspace():
     shutil.rmtree(tmp_path)
     os.unlink(appimagetool_path)
 
 if __name__ == "__main__":
-    parametros = extract_params()
-    check_plugin_latest_version(parametros)
+    check_plugin_latest_version()
     set_github_env_variable("APP_VERSION", parametros.version)
     os.chdir(tmp_path)
-    create_resources(parametros)
+    create_resources()
     download_appimagetool()
-    create_appimage(parametros)
+    create_appimage()
     clear_workspace()
