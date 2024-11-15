@@ -189,8 +189,7 @@ def create_appimage(parametros: InputParameters):
     command = f'ARCH=x86_64 {appimagetool_path} {tmp_path} "{home_dir}/{parametros.name}-{parametros.version}.AppImage" -u "gh-releases-zsync|{github_repo.replace("/","|")}|latest|{parametros.name}-*.AppImage.zsync"'
     print(f"Ejecutando: {command}")
     
-    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, check=True)
-    return result.stdout.decode()
+    subprocess.run(command, shell=True, check=True)
 
 def clear_workspace():
     shutil.rmtree(tmp_path)
