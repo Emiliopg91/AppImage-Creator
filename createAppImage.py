@@ -72,7 +72,7 @@ def check_plugin_latest_version(parametros:InputParameters):
     else:
         print("AppImage is up to date")
 
-    set_github_env_variable("IS_UPDATE", update)
+    set_github_env_variable("IS_UPDATE", f"{update}".lower())
     return update
 
 
