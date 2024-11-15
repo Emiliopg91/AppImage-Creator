@@ -34,21 +34,15 @@ class InputParameters:
     appdir: str
     entrypoint: str
     icon: str
-    type: str
-    categories: str
-    desktop_params: dict  # Nuevo atributo para parámetros adicionales
+    desktop: str
 
-    def __init__(self, name, version, entrypoint, icon, description, type="Application", categories="", desktop_params=None):
-        if desktop_params is None:
-            desktop_params = {}
+    def __init__(self, name, version, entrypoint, icon, description, desktop):
         self.name = name
         self.version = version
         self.entrypoint = os.path.abspath(entrypoint)
         self.icon = os.path.abspath(icon)
         self.description = description
-        self.type = type
-        self.categories = categories
-        self.desktop_params = desktop_params  # Almacena los parámetros adicionales
+        self.desktop = os.path.abspath(desktop)
 
 def set_github_env_variable(variable_name, value):
     if github_env_path:
@@ -79,7 +73,7 @@ def check_plugin_latest_version(parametros:InputParameters):
 def print_help():
     """Imprime el menú de ayuda."""
     print("""
-Uso: script.py --name="<nombre>" --description="<descripción>" --appdir=<ruta> --entrypoint=<ruta> --icon=<ruta> [--type="<tipo>"] [--categories="<categorías>"]
+Uso: script.py --name="<nombre>" --description="<descripción>" --appdir=<ruta> --entrypoint=<ruta> --icon=<ruta> --desktop=<ruta>
 
 Parámetros:
     --name           Nombre de la aplicación
@@ -88,18 +82,15 @@ Parámetros:
     --entrypoint     Ruta de entrada de la aplicación
     --icon           Ruta al icono de la aplicación
     --version        Número de versión
-    --type           Tipo de la aplicación (por defecto: 'Application')
-    --categories     Categorías de la aplicación (por defecto: '')
-    --desktop-*      Cualquier parámetro adicional que empiece con 'desktop-' se almacenará en el diccionario de configuración.
+    --desktop        Ruta al fichero desktop
     """)
     sys.exit(1)
 
 def extract_params():
     """Extrae y valida los parámetros de entrada."""
     pattern = re.compile(r'--(?P<parametro>[-\w]+)=["\']?(?P<valor>[^"\']+)["\']?')
-    required_params = {"name", "version", "entrypoint", "icon", "description"}
+    required_params = {"name", "version", "entrypoint", "icon", "description", "desktop"}
     params = {}
-    desktop_params = {}
 
     for arg in sys.argv[1:]:
         match = pattern.match(arg)
@@ -107,16 +98,8 @@ def extract_params():
             parametro = match.group("parametro")
             valor = match.group("valor")
             
-            if parametro.startswith("desktop-"):
-                # Si el parámetro empieza con 'desktop-', se guarda en 'desktop_params'
-                desktop_key = parametro[len("desktop-"):]  # Eliminar el prefijo 'desktop-'
-                desktop_params[desktop_key] = valor
-            elif parametro in required_params:
-                params[parametro] = valor
-            elif parametro == "type":
-                params["type"] = valor
-            elif parametro == "categories":
-                params["categories"] = valor
+            if parametro in required_params:
+                params[parametro] = valor                
             else:
                 print(f"Parámetro no reconocido: {parametro}")
                 print_help()
@@ -130,16 +113,13 @@ def extract_params():
         print(f"Faltan los siguientes parámetros: {', '.join(missing_params)}")
         print_help()
 
-    # Crear y devolver una instancia de InputParameters
     return InputParameters(
-        name=params["name"],
-        version=params["version"],
-        entrypoint=params["entrypoint"],
-        icon=params["icon"],
-        description=params["description"],
-        type=params.get("type", "Application"),
-        categories=params.get("categories", "Utility"),
-        desktop_params=desktop_params  # Pasar los parámetros 'desktop-' al diccionario
+        params["name"],
+        params["version"], 
+        params["entrypoint"], 
+        params["icon"], 
+        params["description"], 
+        params["desktop"]
     )
 
 def download_appimagetool():
@@ -157,26 +137,18 @@ def create_resources(parametros: InputParameters):
     srcDir = os.path.dirname(parametros.entrypoint)
     usrBin = os.path.abspath(os.path.join(".", "usr", "bin"))
     logoPath = os.path.abspath(os.path.join(".","logo.png"))
+    desktop_entry = os.path.join(tmp_path, f"{parametros.name}.desktop")
     
     shutil.copytree(srcDir, usrBin)
 
     shutil.copy2(parametros.icon, logoPath)
 
-    desktop_entry = os.path.join(tmp_path, f"{parametros.name}.desktop")
-    with open(desktop_entry, "w") as f:
-        f.write(f"""
-[Desktop Entry]
-Name={parametros.name}
-X-AppImage-Version={parametros.version}
-Comment={parametros.description}
-Exec={os.path.basename(parametros.entrypoint)}
-Icon=logo
-Type={parametros.type}
-Categories={parametros.categories};
-""")
-
-        for key, value in parametros.desktop_params.items():
-            f.write(f"\n{key}={value}")
+    content = ""
+    with open(parametros.desktop, 'r') as file:
+        content = file.read()    
+    new_content = content.replace("{name}", f"{parametros.name}").replace("{version}", f"{parametros.version}").replace("{entrypoint}", f"{os.path.basename(parametros.entrypoint)}").replace("{icon}", "logo")
+    with open(desktop_entry, 'w') as file:
+        file.write(new_content)
 
     apprun_file = os.path.join(tmp_path, "AppRun")
     url = "https://raw.githubusercontent.com/AppImage/AppImageKit/master/resources/AppRun"
@@ -196,8 +168,7 @@ def create_appimage(parametros: InputParameters):
         print(f"Error output:\n{result.stderr.decode()}")
         raise RuntimeError(f"Command finished with exit code {result.returncode}")
 
-    set_github_env_variable("APPIMAGE_PATH", os.path.dirname(appimage_path))
-    set_github_env_variable("APPIMAGE_NAME", os.path.basename(appimage_path))
+    set_github_env_variable("APPIMAGE_PATH", appimage_path)
 
 def clear_workspace():
     shutil.rmtree(tmp_path)
@@ -212,4 +183,3 @@ if __name__ == "__main__":
     create_resources(parametros)
     download_appimagetool()
     create_appimage(parametros)
-    clear_workspace()
