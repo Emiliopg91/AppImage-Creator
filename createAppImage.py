@@ -154,11 +154,11 @@ def create_resources():
     content = ""
     with open(parametros.desktop, 'r') as file:
         content = file.read()    
-    new_content = content.replace("{name}", f"{re.sub(r"-AppImage$", "", parametros.name)}") \
-                     .replace("{version}", f"{parametros.version}") \
-                     .replace("{entrypoint}", f"{os.path.basename(parametros.entrypoint)}") \
-                     .replace("{icon}", "logo") \
-                     .replace("{description}", f"{parametros.description}")
+    new_content = content.replace("{name}", f"{re.sub(r'-AppImage$', '', parametros.name)}") \
+                        .replace("{version}", f"{parametros.version}") \
+                        .replace("{entrypoint}", f"{os.path.basename(parametros.entrypoint)}") \
+                        .replace("{icon}", "logo") \
+                        .replace("{description}", f"{parametros.description}")
     with open(desktop_entry, 'w') as file:
         file.write(new_content)
 
