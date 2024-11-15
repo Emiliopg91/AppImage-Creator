@@ -171,11 +171,12 @@ def create_resources():
 
 def create_appimage():
     print("Generando AppImage...")
-    appimage_path = os.path.join(home_dir, f"{re.sub(r'[^a-zA-Z0-9]', '-', parametros.name)}-{parametros.version}.AppImage")
+    file_name = re.sub(r"[^a-zA-Z0-9]", "-", parametros.name)
+    appimage_path = os.path.join(home_dir, f"{file_name}-{parametros.version}.AppImage")
     command = (
         f'ARCH=x86_64 {appimagetool_path} --comp gzip {tmp_path} "{appimage_path}" '
         f'-u "gh-releases-zsync|{github_repo.replace("/", "|")}|latest|'
-        f'{re.sub(r"[^a-zA-Z0-9]", "-", parametros.name)}-*.AppImage.zsync"'
+        f'{file_name}-*.AppImage.zsync"'
     )
     print(f"Ejecutando: {command}")
     
