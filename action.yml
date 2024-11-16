@@ -26,6 +26,11 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - run: |
+          sudo apt-get update
+          sudo apt-get install -y jq libfuse2
+          pip install --upgrade certifi
+      shell: bash
     - run: echo "INPUT_ENTRYPOINT=${{ inputs.entrypoint }}" >> $GITHUB_ENV
       shell: bash
     - run: echo "INPUT_NAME=${{ inputs.name }}" >> $GITHUB_ENV
@@ -36,6 +41,8 @@ runs:
       shell: bash
     - run: echo "INPUT_DESKTOP=${{ inputs.desktop }}" >> $GITHUB_ENV
       shell: bash
+    - run: echo "is_update=${{ env.IS_UPDATE }}" >> $GITHUB_OUTPUT
+      shell: bash
     - run: |
         python3 $GITHUB_ACTION_PATH/createAppImage.py \
             --entrypoint="${{ env.INPUT_ENTRYPOINT }}" \
@@ -44,5 +51,10 @@ runs:
             --icon="${{ env.INPUT_ICON }}" \
             --desktop="${{ env.INPUT_DESKTOP }}"
       shell: bash
-    - run: echo "is_update=${{ env.IS_UPDATE }}" >> $GITHUB_OUTPUT
-      shell: bash
+    -uses: actions/upload-artifact@v4
+    with:
+      name: appimage-files
+      path: |
+        ${{ env.APPIMAGE_PATH }}
+        ${{ env.APPIMAGE_PATH }}.zsync
+          
