@@ -21,8 +21,7 @@ inputs:
     description: 'Path to desktop file'
     required: true
 outputs:
-  is_update:
-    description: 'Decision if the AppImage needs to be updated'
+  is_update: ${{ steps.consolidate_output.outputs.is_update }}
 runs:
   using: "composite"
   steps:
@@ -44,7 +43,8 @@ runs:
       shell: bash
     - run: python3 $GITHUB_ACTION_PATH/createAppImage.py --entrypoint="${{ env.INPUT_ENTRYPOINT }}" --name="${{ env.INPUT_NAME }}" --version=${{ env.INPUT_VERSION }} --icon="${{ env.INPUT_ICON }}" --desktop="${{ env.INPUT_DESKTOP }}"
       shell: bash
-    - run: echo "is_update=${{ env.IS_UPDATE }}" >> $GITHUB_OUTPUT
+    - name: consolidate_output
+      run: echo "is_update=${{ env.IS_UPDATE }}" >> $GITHUB_OUTPUT
       shell: bash
     - uses: actions/upload-artifact@v4
       with:
