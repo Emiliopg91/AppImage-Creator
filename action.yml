@@ -21,7 +21,9 @@ inputs:
     description: 'Path to desktop file'
     required: true
 outputs:
-  is_update: ${{ steps.consolidate_output.outputs.is_update }}
+  is_update: 
+    value: ${{ env.IS_UPDATE }}
+    description: 'Decision if the AppImage needs to be updated'
 runs:
   using: "composite"
   steps:
