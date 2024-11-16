@@ -26,6 +26,11 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - run: |
+        sudo apt-get update
+        sudo apt-get install -y jq libfuse2
+        pip install --upgrade certifi
+      shell: bash
     - run: echo "INPUT_ENTRYPOINT=${{ inputs.entrypoint }}" >> $GITHUB_ENV
       shell: bash
     - run: echo "INPUT_NAME=${{ inputs.name }}" >> $GITHUB_ENV
