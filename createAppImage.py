@@ -12,28 +12,25 @@ import subprocess
 class InputParameters:
     name: str
     version: str
-    description: str
     appdir: str
     entrypoint: str
     icon: str
     desktop: str
 
-    def __init__(self, name, version, entrypoint, icon, description, desktop):
+    def __init__(self, name, version, entrypoint, icon, desktop):
         self.name = name
         self.version = version
         self.entrypoint = os.path.abspath(entrypoint)
         self.icon = os.path.abspath(icon)
-        self.description = description
         self.desktop = os.path.abspath(desktop)
 
 def print_help():
     """Imprime el menú de ayuda."""
     print("""
-Uso: script.py --name="<nombre>" --description="<descripción>" --appdir=<ruta> --entrypoint=<ruta> --icon=<ruta> --desktop=<ruta>
+Uso: script.py --name="<nombre>" --appdir=<ruta> --entrypoint=<ruta> --icon=<ruta> --desktop=<ruta>
 
 Parámetros:
     --name           Nombre de la aplicación
-    --description    Breve descripción de la aplicación
     --appdir         Nombre de la carpeta
     --entrypoint     Ruta de entrada de la aplicación
     --icon           Ruta al icono de la aplicación
@@ -45,7 +42,7 @@ Parámetros:
 def extract_params():
     """Extrae y valida los parámetros de entrada."""
     pattern = re.compile(r'--(?P<parametro>[-\w]+)=["\']?(?P<valor>[^"\']+)["\']?')
-    required_params = {"name", "version", "entrypoint", "icon", "description", "desktop"}
+    required_params = {"name", "version", "entrypoint", "icon", "desktop"}
     params = {}
 
     for arg in sys.argv[1:]:
@@ -73,8 +70,7 @@ def extract_params():
         params["name"],
         params["version"], 
         params["entrypoint"], 
-        params["icon"], 
-        params["description"], 
+        params["icon"],  
         params["desktop"]
     )
 
@@ -158,7 +154,6 @@ def create_resources():
                         .replace("{version}", f"{parametros.version}") \
                         .replace("{entrypoint}", f"{os.path.basename(parametros.entrypoint)}") \
                         .replace("{icon}", "logo") \
-                        .replace("{description}", f"{parametros.description}") \
                         .replace("{url}", f"https://github.com/{github_repo}")
     with open(desktop_entry, 'w') as file:
         file.write(new_content)
