@@ -1,0 +1,44 @@
+name: 'AppImage creator'
+description: 'Used to generate AppImage packages'
+author: 'Emiliopg91'
+branding:
+  icon: activity
+  color: white
+inputs:
+  entrypoint:
+    description: 'Main executable for application'
+    required: true
+  name:
+    description: 'Application name'
+    required: true
+  version:
+    description: 'Application version'
+    required: true
+  icon:
+    description: 'PNG icon for desktop file'
+    required: true
+  desktop:
+    description: 'Path to desktop file'
+    required: true
+outputs:
+  is_update:
+    description: 'Decision if the AppImage needs to be updated'
+runs:
+  using: "composite"
+  steps:
+    - run: echo "INPUT_ENTRYPOINT=${{ inputs.entrypoint }}" >> $GITHUB_ENV
+      shell: bash
+    - run: echo "INPUT_NAME=${{ inputs.name }}" >> $GITHUB_ENV
+      shell: bash
+    - run: echo "INPUT_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+      shell: bash
+    - run: echo "INPUT_ICON=${{ inputs.icon }}" >> $GITHUB_ENV
+      shell: bash
+    - run: echo "INPUT_DESKTOP=${{ inputs.desktop }}" >> $GITHUB_ENV
+      shell: bash
+    - run: chmod +x ${{ github.action_path }}/build.sh
+      shell: bash
+    - run: python3 $GITHUB_ACTION_PATH/createAppImage.py
+      shell: bash
+    - run: echo "is_update=${{ env.IS_UPDATE }}" >> $GITHUB_OUTPUT
+      shell: bash
