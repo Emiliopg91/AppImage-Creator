@@ -46,10 +46,10 @@ runs:
       shell: bash
     - run: python3 $GITHUB_ACTION_PATH/createAppImage.py --entrypoint="${{ env.INPUT_ENTRYPOINT }}" --name="${{ env.INPUT_NAME }}" --version=${{ env.INPUT_VERSION }} --icon="${{ env.INPUT_ICON }}" --desktop="${{ env.INPUT_DESKTOP }}"
       shell: bash
-    -uses: actions/upload-artifact@v4
-    with:
-      name: appimage-files
-      path: |
-        ${{ env.APPIMAGE_PATH }}
-        ${{ env.APPIMAGE_PATH }}.zsync
+    - uses: actions/upload-artifact@v4
+      with:
+        name: appimage-files
+        path: |
+          ${{ env.APPIMAGE_PATH }}
+          ${{ env.APPIMAGE_PATH }}.zsync
           
