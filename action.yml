@@ -21,6 +21,9 @@ inputs:
     description: 'Path to desktop file'
     required: true
 outputs:
+  version:
+    value: ${{ env.APP_VERSION }}
+    description: 'Application version'
   is_update: 
     value: ${{ env.IS_UPDATE }}
     description: 'Decision if the AppImage needs to be updated'
@@ -45,8 +48,10 @@ runs:
       shell: bash
     - run: python3 $GITHUB_ACTION_PATH/createAppImage.py --entrypoint="${{ env.INPUT_ENTRYPOINT }}" --name="${{ env.INPUT_NAME }}" --versioncmd="${{ env.INPUT_VERSIONCMD }}" --icon="${{ env.INPUT_ICON }}" --desktop="${{ env.INPUT_DESKTOP }}"
       shell: bash
-    - name: consolidate_output
+    - name: consolidate_output_update
       run: echo "is_update=${{ env.IS_UPDATE }}" >> $GITHUB_OUTPUT
+    - name: consolidate_output_version
+      run: echo "version=${{ env.APP_VERSION }}" >> $GITHUB_OUTPUT
       shell: bash
     - uses: actions/upload-artifact@v4
       with:
