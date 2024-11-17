@@ -11,18 +11,19 @@ import subprocess
 
 class InputParameters:
     name: str
-    version: str
+    versioncmd: str
     appdir: str
     entrypoint: str
     icon: str
     desktop: str
 
-    def __init__(self, name, version, entrypoint, icon, desktop):
+    def __init__(self, name, versioncmd, entrypoint, icon, desktop):
         self.name = name
-        self.version = version
+        self.versioncmd = versioncmd
         self.entrypoint = os.path.abspath(entrypoint)
         self.icon = os.path.abspath(icon)
         self.desktop = os.path.abspath(desktop)
+        self.version = None
 
 def print_help():
     """Imprime el menú de ayuda."""
@@ -34,7 +35,7 @@ Parámetros:
     --appdir         Nombre de la carpeta
     --entrypoint     Ruta de entrada de la aplicación
     --icon           Ruta al icono de la aplicación
-    --version        Número de versión
+    --versioncmd        Número de versión
     --desktop        Ruta al fichero desktop
     """)
     sys.exit(1)
@@ -42,7 +43,7 @@ Parámetros:
 def extract_params():
     """Extrae y valida los parámetros de entrada."""
     pattern = re.compile(r'--(?P<parametro>[-\w]+)=["\']?(?P<valor>[^"\']+)["\']?')
-    required_params = {"name", "version", "entrypoint", "icon", "desktop"}
+    required_params = {"name", "versioncmd", "entrypoint", "icon", "desktop"}
     params = {}
 
     for arg in sys.argv[1:]:
@@ -68,7 +69,7 @@ def extract_params():
 
     return InputParameters(
         params["name"],
-        params["version"], 
+        params["versioncmd"], 
         params["entrypoint"], 
         params["icon"],  
         params["desktop"]
@@ -95,7 +96,6 @@ else:
 
 def set_github_env_variable(variable_name, value):
     if github_env_path:
-        # Escribe la variable de entorno en el archivo $GITHUB_ENV
         with open(github_env_path, "a") as f:
             f.write(f"{variable_name}={value}\n")
     else:
@@ -163,6 +163,17 @@ def create_resources():
     urllib.request.urlretrieve(url, apprun_file)
     os.chmod(apprun_file, 0o777)
 
+def get_version():
+    command = parametros.versioncmd
+    print(f"Getting version by running: {command}")
+    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    if(result.returncode != 0):
+        print(f"{result.stderr}")
+        raise RuntimeError(f"Command finished with exit code {result.returncode}")
+
+    parametros.version = result.stdout.decode().strip()
+
 
 def create_appimage():
     print("Generando AppImage...")
@@ -188,6 +199,7 @@ def clear_workspace():
     os.unlink(appimagetool_path)
 
 if __name__ == "__main__":
+    get_version()
     check_plugin_latest_version()
     set_github_env_variable("APP_VERSION", parametros.version)
     os.chdir(tmp_path)
