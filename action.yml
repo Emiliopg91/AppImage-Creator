@@ -20,7 +20,7 @@ runs:
       shell: bash
     - run: pip install --upgrade certifi
       shell: bash
-    - run: python3 $GITHUB_ACTION_PATH/createAppImage.py --entrypoint="${{ env.INPUT_ENTRYPOINT }}" --name="${{ env.INPUT_NAME }}" --versioncmd="${{ env.INPUT_VERSIONCMD }}" --icon="${{ env.INPUT_ICON }}" --desktop="${{ env.INPUT_DESKTOP }}"
+    - run: python3 $GITHUB_ACTION_PATH/createAppImage.py
       shell: bash
     - name: consolidate_output_update
       run: echo "is_update=${{ env.IS_UPDATE }}" >> $GITHUB_OUTPUT
