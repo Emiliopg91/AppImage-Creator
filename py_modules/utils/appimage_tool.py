@@ -10,11 +10,12 @@ import urllib.request
 class AppImageTool:
     def __init__(self, github_helper: GithubHelper) -> None:
         self.github_helper = github_helper
-        self.home_dir = os.path.expanduser("~")
-        self.appimagetool_path = os.path.join(self.home_dir, "appimagetool")
-        self.apprun_local_file = os.path.join(self.home_dir, "AppRun")
+        self.working_dir = os.path.abspath(".")
+        self.appimagetool_path = os.path.join(self.working_dir, "appimagetool")
+        self.apprun_local_file = os.path.join(self.working_dir, "AppRun")
         self.tmp_path = tempfile.mkdtemp(prefix = "create-appimage-")
         self.apprun_file = os.path.join(self.tmp_path, "AppRun")
+        print(f"Using tmp file '{self.tmp_path}'")
 
         if not os.path.isfile(self.appimagetool_path):
             url = "https://github.com/AppImage/AppImageKit/releases/latest/download/appimagetool-x86_64.AppImage"
@@ -57,7 +58,7 @@ class AppImageTool:
         os.chdir(self.tmp_path)
         print("Generando AppImage...")
         file_name = re.sub(r"[^a-zA-Z0-9]", "-", name)
-        appimage_path = os.path.join(self.home_dir, f"{file_name}-{version}.AppImage")
+        appimage_path = os.path.join(self.working_dir, f"{file_name}-{version}.AppImage")
         command = (
             f'ARCH=x86_64 {self.appimagetool_path} --comp gzip {self.tmp_path} "{appimage_path}" '
             f'-u "gh-releases-zsync|{self.github_helper.github_repo.replace("/", "|")}|latest|'
