@@ -1,3 +1,5 @@
+from ..utils.desktop_parser import DesktopParser
+
 import os
 import re
 import subprocess
@@ -10,14 +12,25 @@ class InputParameters:
     entrypoint: str
     icon: str
     desktop: str
-
-    def __init__(self, name, versioncmd, entrypoint, icon, desktop):
+    
+    def __init__(self, name, version, entrypoint, icon, desktop):
         self.name = name
         self.entrypoint = os.path.abspath(entrypoint)
         self.icon = os.path.abspath(icon)
         self.desktop = os.path.abspath(desktop)
-        self.version = None
+        self.version = version
+    
+    @staticmethod
+    def from_desktop_file(desktop_file:str = None):
+        if desktop_file is None:
+            desktop_file = InputParameters.find_desktop_file()
 
+        desktop = DesktopParser(desktop_file)
+
+        name = desktop.data["Desktop Entry"]["Name"]
+        entrypoint = desktop.data["AppImage Creator"]["Entrypoint"]
+        icon = desktop.data["AppImage Creator"]["Icon"]
+        versioncmd = desktop.data["AppImage Creator"]["Version-Cmd"]
         print(f"Getting version by running: {versioncmd}")
         result = subprocess.run(versioncmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -25,58 +38,32 @@ class InputParameters:
             print(f"{result.stderr}")
             raise RuntimeError(f"Command finished with exit code {result.returncode}")
 
-        self.version = result.stdout.decode().strip()
+        version = result.stdout.decode().strip()
 
-    @staticmethod
-    def extract_params():
-        """Extrae y valida los parámetros de entrada."""
-        pattern = re.compile(r'--(?P<parametro>[-\w]+)=["\']?(?P<valor>[^"\']+)["\']?')
-        required_params = {"name", "versioncmd", "entrypoint", "icon", "desktop"}
-        params = {}
+        new_desktop_data={}
+        for section, values in desktop.data.items():
+            if section != "AppImage Creator":
+                new_desktop_section_data={}
+                for key, value in values.items():
+                    value = value.replace("{version}", f"{version}") \
+                            .replace("{entrypoint}", f"{os.path.basename(entrypoint)}") \
+                            .replace("{icon}", "logo") 
+                    new_desktop_section_data[key] = value
+                new_desktop_data[section] = new_desktop_section_data
 
-        for arg in sys.argv[1:]:
-            match = pattern.match(arg)
-            if match:
-                parametro = match.group("parametro")
-                valor = match.group("valor")
-                
-                if parametro in required_params:
-                    params[parametro] = valor                
-                else:
-                    print(f"Parámetro no reconocido: {parametro}")
-                    InputParameters.print_help()
-            else:
-                print(f"Formato incorrecto: {arg}")
-                InputParameters.print_help()
 
-        # Verificar si faltan parámetros requeridos
-        missing_params = required_params - params.keys()
-        if missing_params:
-            print(f"Faltan los siguientes parámetros: {', '.join(missing_params)}")
-            InputParameters.print_help()
+        desktop_path = os.path.abspath("aux.desktop")
+        desktop.data = new_desktop_data
+        desktop.persist(desktop_path)
 
-        return InputParameters(
-            params["name"],
-            params["versioncmd"], 
-            params["entrypoint"], 
-            params["icon"],  
-            params["desktop"]
-        )
+        return InputParameters(name, version, entrypoint, icon, desktop_path)
     
     @staticmethod
-    def print_help():
-        """Imprime el menú de ayuda."""
-        print("""
-    Uso: script.py --name="<nombre>" --appdir=<ruta> --entrypoint=<ruta> --icon=<ruta> --desktop=<ruta>
-
-    Parámetros:
-        --name           Nombre de la aplicación
-        --appdir         Nombre de la carpeta
-        --entrypoint     Ruta de entrada de la aplicación
-        --icon           Ruta al icono de la aplicación
-        --versioncmd        Número de versión
-        --desktop        Ruta al fichero desktop
-        """)
-        sys.exit(1)
-
-        
+    def find_desktop_file():
+        current_directory = os.getcwd()
+        print(f"Looking for .desktop file in '{current_directory}'")
+        for file_name in os.listdir(current_directory):
+            if file_name.endswith('.desktop') and file_name != "aux.desktop" and os.path.isfile(file_name):
+                print(f"Found '{os.path.join(current_directory, file_name)}'")
+                return file_name
+        raise FileNotFoundError("Couldn't find .desktop file")

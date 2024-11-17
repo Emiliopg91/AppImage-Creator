@@ -20,3 +20,14 @@ class DesktopParser:
                     # Dividir clave y valor
                     key, value = map(str.strip, line.split('=', 1))
                     self.data[current_section][key] = value
+
+    def persist(self, file_path: str) -> None:
+        with open(file_path, 'w', encoding='utf-8') as file:
+            for section, values in self.data.items():
+                # Escribir la sección
+                file.write(f'[{section}]\n')
+                # Escribir cada clave-valor
+                for key, value in values.items():
+                    file.write(f'{key}={value}\n')
+                # Añadir una línea en blanco entre secciones
+                file.write('\n')

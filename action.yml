@@ -1,32 +1,16 @@
-name: 'AppImage creator'
-description: 'Used to generate AppImage packages'
-author: 'Emiliopg91'
+name: "AppImage creator"
+description: "Used to generate AppImage packages"
+author: "Emiliopg91"
 branding:
   icon: activity
   color: white
-inputs:
-  entrypoint:
-    description: 'Main executable for application'
-    required: true
-  name:
-    description: 'Application name'
-    required: true
-  versioncmd:
-    description: 'Command to get version'
-    required: true
-  icon:
-    description: 'PNG icon for desktop file'
-    required: true
-  desktop:
-    description: 'Path to desktop file'
-    required: true
 outputs:
   version:
     value: ${{ env.APP_VERSION }}
-    description: 'Application version'
-  is_update: 
+    description: "Application version"
+  is_update:
     value: ${{ env.IS_UPDATE }}
-    description: 'Decision if the AppImage needs to be updated'
+    description: "Decision if the AppImage needs to be updated"
 runs:
   using: "composite"
   steps:
@@ -35,16 +19,6 @@ runs:
     - run: sudo apt-get install -y jq libfuse2
       shell: bash
     - run: pip install --upgrade certifi
-      shell: bash
-    - run: echo "INPUT_ENTRYPOINT=${{ inputs.entrypoint }}" >> $GITHUB_ENV
-      shell: bash
-    - run: echo "INPUT_NAME=${{ inputs.name }}" >> $GITHUB_ENV
-      shell: bash
-    - run: echo "INPUT_VERSIONCMD=${{ inputs.versioncmd }}" >> $GITHUB_ENV
-      shell: bash
-    - run: echo "INPUT_ICON=${{ inputs.icon }}" >> $GITHUB_ENV
-      shell: bash
-    - run: echo "INPUT_DESKTOP=${{ inputs.desktop }}" >> $GITHUB_ENV
       shell: bash
     - run: python3 $GITHUB_ACTION_PATH/createAppImage.py --entrypoint="${{ env.INPUT_ENTRYPOINT }}" --name="${{ env.INPUT_NAME }}" --versioncmd="${{ env.INPUT_VERSIONCMD }}" --icon="${{ env.INPUT_ICON }}" --desktop="${{ env.INPUT_DESKTOP }}"
       shell: bash
@@ -59,4 +33,3 @@ runs:
         path: |
           ${{ env.APPIMAGE_PATH }}
           ${{ env.APPIMAGE_PATH }}.zsync
-          
