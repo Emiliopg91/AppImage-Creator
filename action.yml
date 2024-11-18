@@ -9,6 +9,8 @@ outputs:
     description: "Application version"
   is_update:
     description: "Decision if the AppImage needs to be updated"
+  appimage_path:
+    description: "Full-path to appimage"
 runs:
   using: "composite"
   steps:
@@ -20,9 +22,3 @@ runs:
       shell: bash
     - run: python3 -u $GITHUB_ACTION_PATH/createAppImage.py
       shell: bash
-    - uses: actions/upload-artifact@v4
-      with:
-        name: appimage-files
-        path: |
-          ${{ env.APPIMAGE_PATH }}
-          ${{ env.APPIMAGE_PATH }}.zsync
