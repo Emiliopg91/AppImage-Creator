@@ -9,15 +9,27 @@ class GithubHelper:
         self.on_github = os.getenv("GITHUB_ACTIONS") == "true"
         self.github_repo = f"Emiliopg91/VSCode-AppImage"
         self.github_env_path = os.getenv("GITHUB_ENV")
+        self.github_out_path = os.getenv("GITHUB_OUTPUT")
+        self.trigger = os.getenv("github.event_name")
 
         if os.getenv("GITHUB_ACTIONS") == "true":
             self.github_repo = os.getenv("GITHUB_REPOSITORY")
+            print(f"GitHub run triggered by {os.getenv("github.event_name")}")
         else:
-            self.github_env_path = os.path.join(os.path.expanduser("~"), "git.env")
+            print(f"Local run")
+            self.github_env_path = os.path.join(os.getcwd(), "git.env")
             if(os.path.isfile(self.github_env_path)):
                 os.unlink(self.github_env_path)
             with open(self.github_env_path, "w") as file:
                 pass
+            self.github_env_path = os.path.join(os.getcwd(), "git.out")
+            if(os.path.isfile(self.github_env_path)):
+                os.unlink(self.github_env_path)
+            with open(self.github_env_path, "w") as file:
+                pass
+
+        print(f"Job environment file: {self.github_env_path}")
+        print(f"Job output file: {self.github_env_path}")
 
     
     def set_github_env_variable(self, variable_name, value):
