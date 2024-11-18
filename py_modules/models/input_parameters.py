@@ -25,6 +25,8 @@ class InputParameters:
         if desktop_file is None:
             desktop_file = InputParameters.find_desktop_file()
 
+        print("Loading desktop file data")
+
         desktop = DesktopParser(desktop_file)
 
         name = desktop.data["Desktop Entry"]["Name"]
@@ -40,13 +42,15 @@ class InputParameters:
 
         version = result.stdout.decode().strip()
 
+        print("Saving working desktop file")
+
         new_desktop_data={}
         for section, values in desktop.data.items():
             if section != "AppImage Creator":
                 new_desktop_section_data={}
                 for key, value in values.items():
                     value = value.replace("{version}", f"{version}") \
-                            .replace("{entrypoint}", f"{os.path.basename(entrypoint)}") \
+                            .replace("{entrypoint}", f"{os.path.join(name.replace(" ","_"), os.path.basename(entrypoint))}") \
                             .replace("{icon}", "logo") 
                     new_desktop_section_data[key] = value
                 new_desktop_data[section] = new_desktop_section_data
