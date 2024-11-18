@@ -14,6 +14,7 @@ class GithubHelper:
 
         if os.getenv("GITHUB_ACTIONS") == "true":
             self.github_repo = os.getenv("GITHUB_REPOSITORY")
+            print(f"GitHub run triggered by {self.trigger}")
         else:
             print(f"Local run")
             self.github_env_path = os.path.join(os.getcwd(), "git.env")
