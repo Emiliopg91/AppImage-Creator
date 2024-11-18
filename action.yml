@@ -21,6 +21,7 @@ runs:
     - run: python3 -u $GITHUB_ACTION_PATH/createAppImage.py
       shell: bash
     - uses: actions/upload-artifact@v4
+      if: ${{ env.IS_UPDATE == 'true' }}
       with:
         name: appimage-files
         path: |
