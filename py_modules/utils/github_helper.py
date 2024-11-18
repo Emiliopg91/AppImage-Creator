@@ -22,14 +22,14 @@ class GithubHelper:
                 os.unlink(self.github_env_path)
             with open(self.github_env_path, "w") as file:
                 pass
-            self.github_env_path = os.path.join(os.getcwd(), "git.out")
-            if(os.path.isfile(self.github_env_path)):
-                os.unlink(self.github_env_path)
-            with open(self.github_env_path, "w") as file:
+            self.github_out_path = os.path.join(os.getcwd(), "git.out")
+            if(os.path.isfile(self.github_out_path)):
+                os.unlink(self.github_out_path)
+            with open(self.github_out_path, "w") as file:
                 pass
 
         print(f"Job environment file: {self.github_env_path}")
-        print(f"Job output file: {self.github_env_path}")
+        print(f"Job output file: {self.github_out_path}")
 
     
     def set_github_env_variable(self, variable_name, value):
@@ -38,6 +38,14 @@ class GithubHelper:
                 f.write(f"{variable_name}={value}\n")
         else:
             print("No se pudo encontrar la ruta de $GITHUB_ENV. ¿Estás ejecutando este script dentro de GitHub Actions?")
+
+    
+    def set_github_out_variable(self, variable_name, value):
+        if self.github_out_path:
+            with open(self.github_out_path, "a") as f:
+                f.write(f"{variable_name}={value}\n")
+        else:
+            print("No se pudo encontrar la ruta de $GITHUB_OUT. ¿Estás ejecutando este script dentro de GitHub Actions?")
     
 
     def check_update_required(self, newVersion):
@@ -62,5 +70,6 @@ class GithubHelper:
             else:
                 raise e
             
-        self.set_github_env_variable("IS_UPDATE", f"{update}".lower())
+        self.set_github_env_variable("is_update", f"{update}".lower())
+        self.set_github_out_variable("is_update", f"{update}".lower())
         return update

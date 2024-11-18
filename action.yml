@@ -6,10 +6,8 @@ branding:
   color: white
 outputs:
   version:
-    value: ${{ env.APP_VERSION }}
     description: "Application version"
   is_update:
-    value: ${{ env.IS_UPDATE }}
     description: "Decision if the AppImage needs to be updated"
 runs:
   using: "composite"
@@ -20,13 +18,7 @@ runs:
       shell: bash
     - run: pip install --upgrade certifi
       shell: bash
-    - run: python3 -u $GITHUB_ACTION_PATH/createAppImage.py
-      shell: bash
-    - name: consolidate_output_update
-      run: echo "is_update=${{ env.IS_UPDATE }}" >> $GITHUB_OUTPUT
-      shell: bash
-    - name: consolidate_output_version
-      run: echo "version=${{ env.APP_VERSION }}" >> $GITHUB_OUTPUT
+    - run: python3 $GITHUB_ACTION_PATH/createAppImage.py
       shell: bash
     - uses: actions/upload-artifact@v4
       with:
