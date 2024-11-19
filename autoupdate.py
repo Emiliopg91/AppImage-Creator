@@ -53,6 +53,7 @@ if __name__ == "__main__":
                 os.unlink(appimage)
 
             shutil.copy2(tmp_file, appimage)
+            os.unlink(tmp_file)
             os.chmod(appimage, permissions)
             print(f"Update AppImage copied to '{appimage}'")
             print("Launching new instance")
