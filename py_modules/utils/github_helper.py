@@ -21,6 +21,7 @@ class GithubHelper:
         self.out_path = os.getenv("GITHUB_OUTPUT")
         self.action_path = os.getenv("GITHUB_ACTION_PATH")
         self.trigger = os.getenv("github.event_name")
+        self.latest_url = f"{GITHUB_API_URL}/repos/{self.repo}/releases/latest"
 
         if os.getenv("GITHUB_ACTIONS") == "true":
             print(f"GitHub run triggered by {self.trigger}")
@@ -52,7 +53,7 @@ class GithubHelper:
             print("Failed to locate $GITHUB_OUTPUT. Are you running this script inside GitHub Actions?")
 
     def get_latest_version(self):
-        url = f"{GITHUB_API_URL}/repos/{self.repo}/releases/latest"
+        url = self.latest_url
         response = urllib.request.urlopen(url, context=ssl.create_default_context(cafile=certifi.where()))
         json_data = json.load(response)
 

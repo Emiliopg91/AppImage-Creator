@@ -1,4 +1,5 @@
 from .github_helper import GithubHelper
+from .desktop_parser import DesktopParser
 
 import os
 import re
@@ -12,10 +13,13 @@ class AppImageTool:
         self.working_dir = github_helper.action_path
         self.appimagetool_path = os.path.join(self.working_dir, "appimagetool")
         self.apprun_local_file = os.path.join(self.working_dir, "AppRun")
+        self.autoup_local_file = os.path.join(self.working_dir, "autoupdate.py")
         self.tmp_path = tempfile.mkdtemp(prefix = "create-appimage-")
         self.apprun_file = os.path.join(self.tmp_path, "AppRun")
+        self.autoup_file = os.path.join(self.tmp_path, "autoupdate.py")
         print(f"Using tmp file '{self.tmp_path}'")
         
+        shutil.copy2(self.autoup_local_file, self.autoup_file)
         shutil.copy2(self.apprun_local_file, self.apprun_file)
         os.chmod(self.apprun_file, 0o777)
 
@@ -41,11 +45,17 @@ class AppImageTool:
                             .replace("{url}", f"https://github.com/{self.github_helper.repo}")
         with open(desktop_entry, 'w') as file:
             file.write(new_content)
+
+        desktop = DesktopParser(desktop_entry)
+        desktop.data["Desktop Entry"]["X-GitHub-Api"] = self.github_helper.latest_url
+        desktop.persist(desktop_entry)
+
         os.chdir(prev_cwd)
 
     def create_appimage(self, name, version):
         prev_cwd=os.getcwd()
         os.chdir(self.tmp_path)
+
         file_name = re.sub(r"[^a-zA-Z0-9]", "-", name)
         appimage_path = os.path.join(self.working_dir, f"{file_name}-{version}.AppImage")
         print(f"Generating AppImage file '{file_name}'")

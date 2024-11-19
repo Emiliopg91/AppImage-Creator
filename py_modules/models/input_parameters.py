@@ -53,8 +53,7 @@ class InputParameters:
                             .replace("{entrypoint}", os.path.join(name.replace(" ","_"), os.path.basename(entrypoint))) \
                             .replace("{icon}", "logo") 
                     new_desktop_section_data[key] = value
-                new_desktop_data[section] = new_desktop_section_data
-
+                new_desktop_data[section] = new_desktop_section_data            
 
         desktop_path = os.path.abspath("aux.desktop")
         desktop.data = new_desktop_data

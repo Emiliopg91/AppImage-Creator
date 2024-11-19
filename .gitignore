@@ -1,0 +1,17 @@
+.vscode/launch.json
+git.env
+aux.desktop
+git.out
+Visual-Studio-Code-1.95.2.AppImage.zsync
+Visual-Studio-Code-1.95.2.AppImage
+vsc.desktop
+py_modules/models/__pycache__/input_parameters.cpython-313.pyc
+py_modules/utils/__pycache__/appimage_tool.cpython-313.pyc
+py_modules/utils/__pycache__/github_helper.cpython-313.pyc
+py_modules/utils/__pycache__/github_helper.cpython-313.pyc
+py_modules/utils/__pycache__/appimage_tool.cpython-313.pyc
+py_modules/models/__pycache__/input_parameters.cpython-313.pyc
+py_modules/utils/__pycache__/github_helper.cpython-313.pyc
+py_modules/utils/__pycache__/appimage_tool.cpython-313.pyc
+
+*.pyc
