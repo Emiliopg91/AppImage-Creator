@@ -17,3 +17,7 @@ py_modules/utils/__pycache__/appimage_tool.cpython-313.pyc
 *.pyc
 
 RogControlCenter/resources/
+
+tests/electronApp/
+
+tests/fullFunctionality/

@@ -4,6 +4,11 @@ author: "Emiliopg91"
 branding:
   icon: activity
   color: white
+inputs:
+  is_electron:
+    description: "Apply Electron rules"
+    required: false
+    default: "false"
 outputs:
   version:
     description: "Application version"
@@ -14,13 +19,20 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - run: echo "INPUT_IS_ELECTRON=${{ inputs.is_electron }}" >> $GITHUB_ENV
+      shell: bash
     - run: sudo apt-get update
       shell: bash
-    - run: sudo apt-get install -y jq libfuse2 desktop-file-utils fuse zsync
+    - run: sudo apt-get install -y jq libfuse2 zsync
       shell: bash
     - run: pip install --upgrade certifi
       shell: bash
-    - run: chmod +x $GITHUB_ACTION_PATH/appimagetool
+    - run: chmod +x $GITHUB_ACTION_PATH/resources/appimagetool
       shell: bash
-    - run: python3 -u $GITHUB_ACTION_PATH/createAppImage.py
+    - run: |
+        if [[ "${{ inputs.is_electron }}" == "true" ]]; then
+          python3 -u $GITHUB_ACTION_PATH/createElectronAppImage.py
+        else
+          python3 -u $GITHUB_ACTION_PATH/createAppImage.py
+        fi
       shell: bash
