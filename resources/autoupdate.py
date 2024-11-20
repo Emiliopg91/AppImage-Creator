@@ -34,9 +34,10 @@ if __name__ == "__main__":
     try:
         version=sys.argv[1]
         github_url = sys.argv[2]
-        appimage = sys.argv[3]
+        name = sys.argv[3]
+        appimage = sys.argv[4]
 
-        print(f"{os.path.basename(appimage)} in version {version}")
+        print(f"{name} v.{version}")
         print(f"Checking for updates on {github_url}")
         
         release = get_latest_release(github_url)
