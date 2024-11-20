@@ -1,4 +1,4 @@
-from py_modules.utils.github_helper import GithubHelper
+from py_modules.github_helper import GithubHelper
 
 import requests
 import sys
