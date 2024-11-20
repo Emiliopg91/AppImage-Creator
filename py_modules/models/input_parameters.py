@@ -21,9 +21,8 @@ class InputParameters:
         self.version = version
     
     @staticmethod
-    def from_desktop_file(desktop_file:str = None):
-        if desktop_file is None:
-            desktop_file = InputParameters.find_desktop_file()
+    def from_desktop_file():
+        desktop_file = InputParameters.find_desktop_file()
 
         print("Loading desktop file data")
 
