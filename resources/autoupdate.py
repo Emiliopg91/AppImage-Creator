@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
         if latest_version!=version:
             print(f"New version {latest_version} available")
-            subprocess.run(["notify-send", "Installing update", "Please wait, App will start automatically", "--icon", os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.png")])
+            subprocess.run(["/usr/bin/notify-send", "Installing update", "Please wait, App will start automatically", "--icon", os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.png")])
             tmp_file = download_latest_appimage(release)
 
             permissions = os.stat(appimage).st_mode
