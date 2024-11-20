@@ -21,10 +21,8 @@ class InputParameters:
         self.version = version
     
     @staticmethod
-    def from_desktop_file(desktop_file:str = None):
-        if desktop_file is None:
-            desktop_file = InputParameters.find_desktop_file()
-
+    def from_desktop_file(base_path:str = None):
+        desktop_file = os.path.join(base_path, "app.desktop")
         print("Loading desktop file data")
 
         desktop = DesktopParser(desktop_file)
@@ -36,7 +34,7 @@ class InputParameters:
         print(f"Getting version by running: {versioncmd}")
         result = subprocess.run(versioncmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        if(result.returncode != 0):
+        if(result.returncode != 0): 
             print(f"{result.stderr}")
             raise RuntimeError(f"Command finished with exit code {result.returncode}")
 
@@ -55,18 +53,9 @@ class InputParameters:
                     new_desktop_section_data[key] = value
                 new_desktop_data[section] = new_desktop_section_data            
 
-        desktop_path = os.path.abspath("aux.desktop")
+        desktop_path = os.path.abspath(os.path.join(base_path, "aux.desktop"))
         desktop.data = new_desktop_data
         desktop.persist(desktop_path)
 
         return InputParameters(name, version, entrypoint, icon, desktop_path)
     
-    @staticmethod
-    def find_desktop_file():
-        current_directory = os.getcwd()
-        print(f"Looking for .desktop file in '{current_directory}'")
-        for file_name in os.listdir(current_directory):
-            if file_name.endswith('.desktop') and file_name != "aux.desktop" and os.path.isfile(file_name):
-                print(f"Found '{os.path.join(current_directory, file_name)}'")
-                return file_name
-        raise FileNotFoundError("Couldn't find .desktop file")
