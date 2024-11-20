@@ -66,7 +66,7 @@ class AppImageTool:
         command = (
             f'ARCH=x86_64 {self.appimagetool_path} --comp gzip {self.tmp_path} "{appimage_path}" '
             f'-u "gh-releases-zsync|{self.github_helper.repo.replace("/", "|")}|latest|'
-            f'{file_name}-*.AppImage.zsync"'
+            f'{file_name}.AppImage.zsync"'
         )
         print(f"Running '{command}'")
         
