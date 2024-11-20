@@ -1,11 +1,14 @@
-from py_modules.models.input_parameters import InputParameters
-from py_modules.utils.appimage_tool import AppImageTool
-from py_modules.utils.github_helper import GithubHelper
+from py_modules.input_parameters import InputParameters
+from py_modules.appimage_tool import AppImageTool
+from py_modules.github_helper import GithubHelper
 
+import os
 
 if __name__ == "__main__":
     github_helper = GithubHelper()
     appimagetool = AppImageTool(github_helper)
+
+    os.chdir(os.getenv("GITHUB_WORKSPACE"))
     try:
         parametros = InputParameters.from_desktop_file()
 
