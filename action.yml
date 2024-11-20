@@ -16,7 +16,7 @@ runs:
   steps:
     - run: sudo apt-get update
       shell: bash
-    - run: sudo apt-get install -y jq libfuse2 desktop-file-validate
+    - run: sudo apt-get install -y jq libfuse2 desktop-file-utils fuse zsync
       shell: bash
     - run: pip install --upgrade certifi
       shell: bash
