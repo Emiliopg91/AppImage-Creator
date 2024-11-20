@@ -15,3 +15,5 @@ py_modules/utils/__pycache__/github_helper.cpython-313.pyc
 py_modules/utils/__pycache__/appimage_tool.cpython-313.pyc
 
 *.pyc
+
+RogControlCenter/resources/

@@ -20,5 +20,7 @@ runs:
       shell: bash
     - run: pip install --upgrade certifi
       shell: bash
+    - run: chmod +x $GITHUB_ACTION_PATH/appimagetool
+      shell: bash
     - run: python3 -u $GITHUB_ACTION_PATH/createAppImage.py
       shell: bash
